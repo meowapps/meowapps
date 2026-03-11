@@ -17,8 +17,8 @@ jobs:
       - name: Generate and push template
         run: |
           repo=https://x-access-token:${{ secrets.TEMPLATE_PAT }}@github.com/meowapps/meowapps-template.git
-          git clone "$repo" out
-          cd out
+          git clone "$repo" meowapps-template
+          cd meowapps-template
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
@@ -26,11 +26,11 @@ jobs:
           git ls-files -z | xargs -0 rm -f
           cd ..
 
-          cp .firebaserc .gitignore shopify.app.toml out/
-          mkdir -p out/src
-          cp src/page.index.jsx src/app.index.jsx src/app.additional.jsx src/app._layout.jsx out/src/
+          cp .firebaserc .gitignore shopify.app.toml meowapps-template/
+          mkdir -p meowapps-template/src
+          cp src/page.index.jsx src/app.index.jsx src/app.additional.jsx src/app._layout.jsx meowapps-template/src/
 
-          cat > out/package.json << 'PKG'
+          cat > meowapps-template/package.json << 'PKG'
           {
             "private": true,
             "scripts": {
@@ -45,7 +45,7 @@ jobs:
           }
           PKG
 
-          cd out
+          cd meowapps-template
           npm install
 
           git add -A
