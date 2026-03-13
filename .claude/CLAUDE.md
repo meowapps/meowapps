@@ -64,6 +64,20 @@ async function scanRoutes(c, files) {
 ### 12. Consistent style for same patterns
 Same kind of operation → same pattern everywhere.
 
+### 13. Return early, functions below
+In components and handlers: state/setup → return → helper functions. Reader sees *what* renders first, *how* it works after.
+```jsx
+function Index() {
+  const [data, setData] = useState(null)
+  useEffect(() => { ... }, [])
+
+  return (<s-page>...</s-page>)
+
+  async function loadData() { ... }
+  function handleClick() { ... }
+}
+```
+
 ## Conventions
 
 - **Section markers**: `// --- name ---` with horizontal dashes
