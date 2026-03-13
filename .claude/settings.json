@@ -1,15 +1,1 @@
-{
-  "permissions": {
-    "allow": [
-      "Read(node_modules/meowapps/**)",
-      "WebSearch",
-      "mcp__shopify-dev-mcp__search_docs_chunks",
-      "mcp__shopify-dev-mcp__learn_shopify_api",
-      "mcp__shopify-dev-mcp__introspect_graphql_schema",
-      "mcp__shopify-dev-mcp__validate_graphql_codeblocks",
-      "mcp__shopify-dev-mcp__validate_component_codeblocks",
-      "mcp__shopify-dev-mcp__fetch_full_docs",
-      "mcp__shopify-dev-mcp__learn_extension_target_types"
-    ]
-  }
-}
+{}
