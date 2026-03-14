@@ -89,7 +89,7 @@ fs.rmSync(tmp, { recursive: true })
 // Clean and reinstall (skip if package.json has conflicts)
 for (const p of ['node_modules', 'package-lock.json', 'dist']) fs.rmSync(p, { recursive: true, force: true })
 const pkgConflict = fs.readFileSync('package.json', 'utf8').includes('<<<<<<<')
-if (!pkgConflict) execSync('npm i', { stdio: 'inherit' })
+if (!pkgConflict) execSync('npm i', { stdio: 'pipe' })
 
 console.log(`\n${added} added, ${applied} updated, ${conflicts} conflicts`)
 if (conflicts) console.log(`Resolve conflicts then ${pkgConflict ? 'run npm i and ' : ''}commit.`)
