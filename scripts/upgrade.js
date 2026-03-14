@@ -98,12 +98,10 @@ if (latestMeowappsSha) {
   fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n')
 }
 
-console.log(`\n${added} added, ${applied} updated, ${conflicts} conflicts`)
-if (conflicts) {
-  console.log('Resolve conflicts then commit.')
-  process.exit(1)
-}
-
-// Clean and reinstall
+// Clean and reinstall (skip if package.json has conflicts)
 for (const p of ['node_modules', 'package-lock.json', 'dist']) fs.rmSync(p, { recursive: true, force: true })
-execSync('npm i', { stdio: 'inherit' })
+const pkgConflict = fs.readFileSync('package.json', 'utf8').includes('<<<<<<<')
+if (!pkgConflict) execSync('npm i', { stdio: 'inherit' })
+
+console.log(`\n${added} added, ${applied} updated, ${conflicts} conflicts`)
+if (conflicts) console.log(`Resolve conflicts then ${pkgConflict ? 'run npm i and ' : ''}commit.`)
