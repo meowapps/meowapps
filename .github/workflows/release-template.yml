@@ -38,12 +38,12 @@ jobs:
             "private": true,
             "scripts": {
               "dev": "shopify app dev",
-              "deploy": "shopify app deploy",
+              "deploy": "shopify app deploy && meowapps deploy",
               "claude": "meowapps claude",
               "upgrade": "meowapps upgrade"
             },
             "dependencies": {
-              "meowapps": "github:meowapps/meowapps",
+              "meowapps": "github:meowapps/meowapps#$COMMIT_SHA",
               "react": "^19.2.4"
             }
           }
