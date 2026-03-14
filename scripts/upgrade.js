@@ -39,7 +39,7 @@ const pkgConflict = fs.readFileSync('package.json', 'utf8').includes('<<<<<<<')
 if (pkgConflict) {
   console.log('Resolve package.json conflicts, then npm i.')
 } else {
-  for (const p of ['package-lock.json', 'dist']) fs.rmSync(p, { recursive: true, force: true })
+  for (const p of ['node_modules', 'package-lock.json', 'dist']) fs.rmSync(p, { recursive: true, force: true })
   execSync('npm i', { stdio: 'pipe' })
 }
 
