@@ -29,7 +29,7 @@ jobs:
           git ls-files -z | xargs -0 rm -f
           cd ..
 
-          cp .firebaserc .gitignore shopify.app.toml shopify.web.toml meowapps-template/
+          cp .firebaserc .gitignore shopify.app.toml meowapps-template/
           mkdir -p meowapps-template/src
           cp src/page.index.jsx src/app.index.jsx src/app.additional.jsx src/app._layout.jsx meowapps-template/src/
 
@@ -37,7 +37,7 @@ jobs:
           {
             "private": true,
             "scripts": {
-              "dev": "shopify app dev",
+              "dev": "meowapps dev",
               "deploy": "shopify app deploy && meowapps deploy",
               "claude": "meowapps claude",
               "upgrade": "meowapps upgrade"
