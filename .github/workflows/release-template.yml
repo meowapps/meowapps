@@ -33,7 +33,7 @@ jobs:
           mkdir -p meowapps-template/src
           cp src/page.index.jsx src/app.index.jsx src/app.additional.jsx src/app._layout.jsx meowapps-template/src/
 
-          cat > meowapps-template/package.json << PKG
+          cat > meowapps-template/package.json << 'PKG'
           {
             "private": true,
             "scripts": {
@@ -43,7 +43,7 @@ jobs:
               "upgrade": "meowapps upgrade"
             },
             "dependencies": {
-              "meowapps": "github:meowapps/meowapps#$COMMIT_SHA",
+              "meowapps": "github:meowapps/meowapps",
               "react": "^19.2.4"
             }
           }

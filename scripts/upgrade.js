@@ -9,12 +9,10 @@ const untracked = execSync('git ls-files --others --exclude-standard', { encodin
 if (untracked) { console.error('Untracked files found. Commit or stash before upgrading.'); process.exit(1) }
 
 const TEMPLATE = 'https://github.com/meowapps/meowapps-template.git'
-const MEOWAPPS = 'github:meowapps/meowapps'
-
-// Read pinned meowapps SHA from package.json
-const pkg = JSON.parse(fs.readFileSync('package.json', 'utf8'))
-const currentRef = pkg.dependencies?.meowapps || ''
-const meowappsSha = currentRef.includes('#') ? currentRef.split('#')[1] : ''
+// Read current meowapps SHA from package-lock.json
+const lock = JSON.parse(fs.readFileSync('package-lock.json', 'utf8'))
+const resolved = lock.packages?.['node_modules/meowapps']?.resolved || ''
+const meowappsSha = resolved.match(/#(\w+)$/)?.[1] || ''
 
 // Clone full template repo
 const tmp = execSync('mktemp -d', { encoding: 'utf8' }).trim()
@@ -86,17 +84,7 @@ for (const f of templateFiles) {
   }
 }
 
-// Get meowapps SHA from latest template commit message
-const latestMsg = execSync('git log -1 --format="%s"', { cwd: tmp, encoding: 'utf8' }).trim()
-const latestMeowappsSha = latestMsg.match(/meowapps@(\w+)/)?.[1] || ''
-
 fs.rmSync(tmp, { recursive: true })
-
-// Update meowapps dependency to pin latest SHA
-if (latestMeowappsSha) {
-  pkg.dependencies.meowapps = `${MEOWAPPS}#${latestMeowappsSha}`
-  fs.writeFileSync('package.json', JSON.stringify(pkg, null, 2) + '\n')
-}
 
 // Clean and reinstall (skip if package.json has conflicts)
 for (const p of ['node_modules', 'package-lock.json', 'dist']) fs.rmSync(p, { recursive: true, force: true })
