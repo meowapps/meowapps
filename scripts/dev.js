@@ -1,12 +1,11 @@
 #!/usr/bin/env node
 import { spawn, execSync } from 'child_process'
 import fs from 'fs'
-import { builder } from './build.js'
-
-const { dist, handlers } = builder.config()
 
 if (process.argv.includes('--only-web')) {
   // Called by Shopify CLI via shopify.web.toml — build + emulators + watch
+  const { builder } = await import('./build.js')
+  const { dist, handlers } = builder.config()
   execSync(`node ${import.meta.dirname}/build.js`, { stdio: 'inherit' })
   execSync('npm i', { cwd: dist, stdio: 'pipe' })
   const emu = spawn('npm', ['run', 'dev', '--', '--log-verbosity', 'SILENT'], { cwd: dist, stdio: ['ignore', 'pipe', 'pipe'], env: process.env })
