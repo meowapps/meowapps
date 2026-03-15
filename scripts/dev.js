@@ -14,7 +14,7 @@ if (process.argv.includes('--only-web')) {
   const filter = chunk => {
     for (const line of chunk.toString().split('\n')) {
       if (!line.trim()) continue
-      if (line.includes('Issues?')) { passthrough = true; continue }
+      if (line.includes('Issues?')) { passthrough = true; console.log('✅ Ready, watching for changes'); continue }
       if (passthrough && !/Using node@|Serving at port/.test(line)) process.stdout.write(line.replace(/\[.*?\]\s*/g, '') + '\n')
     }
   }

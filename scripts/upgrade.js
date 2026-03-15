@@ -41,6 +41,7 @@ if (pkgConflict) {
 } else {
   for (const p of ['node_modules', 'package-lock.json', 'dist']) fs.rmSync(p, { recursive: true, force: true })
   execSync('npm i', { stdio: 'pipe' })
+  console.log('Upgraded to latest.')
 }
 
 // --- functions ---
