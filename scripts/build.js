@@ -315,8 +315,7 @@ function registry(c, adds) {
 // Resolve Shopify app config file from CLI cache
 function getConfigFile() {
   const cached = new Conf({ projectName: 'shopify-cli-app' }).get(process.cwd())
-  if (!cached?.configFile) throw new Error('No Shopify app config found. Run "shopify app dev" or "shopify app build" first.')
-  return cached.configFile
+  return cached?.configFile ?? 'shopify.app.toml'
 }
 
 // Read port from shopify.web.toml
