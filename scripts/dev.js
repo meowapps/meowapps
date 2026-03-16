@@ -24,7 +24,7 @@ if (process.argv.includes('--only-web')) {
 } else {
   // Ensure shopify.web.toml exists (Shopify CLI requires it at project root)
   fs.copyFileSync(import.meta.dirname + '/../shopify.web.toml', 'shopify.web.toml')
-  execSync(`shopify app dev ${process.argv.slice(2).join(' ')}`, { stdio: 'inherit' })
+  execSync(`npx shopify app dev ${process.argv.slice(2).join(' ')}`, { stdio: 'inherit' })
 }
 
 // ---------------------------------------------------------------------------

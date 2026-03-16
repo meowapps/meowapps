@@ -8,6 +8,7 @@
     "meowapps": "./scripts/meowapps.js"
   },
   "dependencies": {
+    "@shopify/cli": "^3.92.1",
     "@shopify/shopify-api": "^12.3.0",
     "@shopify/shopify-app-express": "^6.0.5",
     "conf": "^15.1.0",
