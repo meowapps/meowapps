@@ -215,9 +215,9 @@ async function handleBilling(req, res) {
   if (action === 'billing.cancel') return res.json(await billing.cancel(id))
 
   const plans = {
-    monthly: { name: 'Demo Monthly', price: 5.00, interval: BillingInterval.Monthly, trialDays: 7, test: true },
-    annual: { name: 'Demo Annual', price: 50.00, interval: BillingInterval.Annual, trialDays: 7, test: true },
-    oneTime: { name: 'Demo Feature', price: 10.00, interval: BillingInterval.OneTime, test: true },
+    monthly: { name: 'Demo Monthly', price: 5.00, interval: BillingInterval.Monthly, trialDays: 7 },
+    annual: { name: 'Demo Annual', price: 50.00, interval: BillingInterval.Annual, trialDays: 7 },
+    oneTime: { name: 'Demo Feature', price: 10.00, interval: BillingInterval.OneTime },
   }
   const plan = plans[interval]
   if (!plan) return res.status(400).json({ error: 'Invalid interval' })

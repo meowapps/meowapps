@@ -12,6 +12,7 @@ initializeApp()
 export const shopify = lazy(createShopifyApp)
 export const cookieStorage = createCookieStorage()
 export const authenticate = authenticateFn
+export const authenticateOffline = authenticateOfflineFn
 export const BillingInterval = Object.freeze({
   Monthly: 'EVERY_30_DAYS',
   Annual: 'ANNUAL',
@@ -63,7 +64,7 @@ function createCookieStorage() {
 
 // --- auth ------------------------------------------------------------------
 
-// Authenticate a request via Shopify middleware, return session + graphql + billing helpers.
+// Validate HTTP request, then delegate to authenticateOffline.
 async function authenticateFn(req, res) {
   await new Promise((resolve, reject) => {
     shopify.validateAuthenticatedSession()(req, res, (err) => {
@@ -74,6 +75,16 @@ async function authenticateFn(req, res) {
   const session = res.locals.shopify?.session
   if (!session) throw new Error('Unauthorized')
 
+  return authenticateOfflineFn(session.shop)
+}
+
+// Create graphql + billing + metafields helpers from offline session.
+// Used by webhooks, cron jobs, or anywhere without HTTP request.
+async function authenticateOfflineFn(shop) {
+  const sessions = await shopify.config.sessionStorage.findSessionsByShop(shop)
+  const session = sessions[0]
+  if (!session) throw new Error(`No session found for ${shop}`)
+
   const client = new shopify.api.clients.Graphql({ session })
   const graphql = async (query, variables) => {
     const { data, errors } = await client.request(query, { variables })
@@ -81,35 +92,54 @@ async function authenticateFn(req, res) {
     return data
   }
 
-  return { session, graphql, billing: createBilling(session.shop, graphql) }
+  return { session, graphql, billing: createBilling(shop, graphql) }
 }
 
 // --- billing ---------------------------------------------------------------
 
 // Billing helpers scoped to a shop. Supports subscriptions and one-time purchases.
-// All methods query Shopify directly as source of truth — no Firestore cache.
+// check() syncs $app:plan metafield so checkout extensions can read the active plan.
 function createBilling(shop, graphql) {
-  // Billing returnUrl must go through admin.shopify.com so Shopify injects session context
   const storeHandle = shop.replace('.myshopify.com', '')
   const url = (path) => `https://admin.shopify.com/store/${storeHandle}/apps/${process.env.SHOPIFY_API_KEY}${path}`
+  let devStore = null
 
   return {
-    // Query Shopify for active subscription status.
+    // Query Shopify for active subscription and sync $app:plan metafield.
     async check() {
       const data = await graphql(`query { currentAppInstallation { activeSubscriptions {
         id name status test trialDays createdAt currentPeriodEnd
         lineItems { plan { pricingDetails {
           ... on AppRecurringPricing { price { amount currencyCode } interval }
         } } }
-      } } }`)
+      } } shop { id plan { partnerDevelopment } metafield(namespace: "$app", key: "plan") { id value } } }`)
+
+      devStore = data.shop?.plan?.partnerDevelopment ?? false
+
       const subs = data.currentAppInstallation?.activeSubscriptions || []
-      if (!subs.length) return { active: false }
-      return { active: true, ...mapSubscription(subs[0]) }
+      const planMeta = data.shop?.metafield
+      const planName = subs.length ? subs[0].name : null
+
+      // Sync metafield to match billing state
+      if (planName && planMeta?.value !== planName) {
+        await graphql(`mutation ($metafields: [MetafieldsSetInput!]!) {
+          metafieldsSet(metafields: $metafields) { metafields { id } userErrors { field message } }
+        }`, { metafields: [{ namespace: '$app', key: 'plan', value: planName, type: 'single_line_text_field', ownerId: data.shop.id }] })
+      } else if (!planName && planMeta) {
+        await graphql(`mutation ($input: MetafieldDeleteInput!) {
+          metafieldDelete(input: $input) { deletedId userErrors { field message } }
+        }`, { input: { id: planMeta.id } })
+      }
+
+      if (!subs.length) return { active: false, plan: null }
+      return { active: true, plan: planName, ...mapSubscription(subs[0]) }
     },
 
-    // Ensure active billing exists. Queries Shopify, or creates a new charge if none found.
-    // Returns { active: true, ...record } or { active: false, confirmationUrl }.
-    async require({ name, price, interval = BillingInterval.Monthly, trialDays = 0, test = false, returnUrl = '/app' }) {
+    // Ensure active billing exists. Auto-enables test mode on dev stores.
+    async require({ name, price, interval = BillingInterval.Monthly, trialDays = 0, returnUrl = '/app' }) {
+      if (devStore === null) await this.check()
+
+      const test = devStore
       return interval === BillingInterval.OneTime
         ? requireOneTime(graphql, { name, price, test, returnUrl: url(returnUrl) })
         : requireSubscription(graphql, { name, price, interval, trialDays, test, returnUrl: url(returnUrl) })
