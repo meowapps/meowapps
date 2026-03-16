@@ -7,12 +7,12 @@ embedded = true
 api_version = "2026-01"
 
 [[webhooks.subscriptions]]
-topics = [ "app/uninstalled", "app/scopes_update", "app_subscriptions/update" ]
+topics = [ "app/uninstalled", "app/scopes_update" ]
 compliance_topics = [ "customers/data_request", "customers/redact", "shop/redact" ]
 uri = "https://demo-meowapps.web.app/api/webhook"
 
 [access_scopes]
-scopes = "write_products,read_app_subscriptions,write_shop_metafields"
+scopes = "write_products"
 
 [auth]
 redirect_urls = [ "https://demo-meowapps.web.app/api/auth/callback" ]

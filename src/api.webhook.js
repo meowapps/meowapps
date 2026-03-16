@@ -1,4 +1,4 @@
-import { shopify, authenticateOffline } from 'meowapps'
+import { shopify } from 'meowapps'
 
 // Process incoming Shopify webhooks.
 export async function POST(req, res) {
@@ -8,7 +8,6 @@ export async function POST(req, res) {
     webhookHandlers: {
       APP_UNINSTALLED: { callback: handleAppUninstalled },
       APP_SCOPES_UPDATE: { callback: handleScopesUpdate },
-      APP_SUBSCRIPTIONS_UPDATE: { callback: handleSubscriptionUpdate },
       CUSTOMERS_DATA_REQUEST: { callback: handleGdpr },
       CUSTOMERS_REDACT: { callback: handleGdpr },
       SHOP_REDACT: { callback: handleGdpr },
@@ -35,17 +34,6 @@ async function handleScopesUpdate(topic, shop, body) {
     s.scope = body.current?.toString()
     return storage.storeSession(s)
   }))
-}
-
-// Sync $app:plan metafield when subscription status changes.
-async function handleSubscriptionUpdate(topic, shop) {
-  console.log(`Received ${topic} webhook for ${shop}`)
-  try {
-    const { billing } = await authenticateOffline(shop)
-    await billing.check()
-  } catch (err) {
-    console.error(`Failed to sync plan for ${shop}:`, err.message)
-  }
 }
 
 // GDPR mandatory compliance — app stores no customer data, acknowledge only.
