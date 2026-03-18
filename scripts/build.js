@@ -293,7 +293,7 @@ async function bundleServer(c, { routes }) {
 
   w(`${c.dist}/package.json`, {
     private: true,
-    scripts: { postinstall: 'cd functions && npm install', dev: 'firebase emulators:start', deploy: 'firebase deploy' },
+    scripts: { postinstall: 'cd functions && npm install', dev: 'firebase emulators:start --project demo-meowapps', deploy: 'firebase deploy' },
     dependencies: c.fb.root,
   })
 }
